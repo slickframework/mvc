@@ -24,7 +24,8 @@
   "require": {
     "php" : ">=5.6",
     "slick/di": "^2.1",
-    "slick/http": "^1.2"
+    "slick/http": "^1.2",
+    "slick/configuration": "@dev"
   },
   "require-dev": {
     "phpspec/phpspec": "^3.2"

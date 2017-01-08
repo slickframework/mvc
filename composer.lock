@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "a32df49a1700b8a682b739b842aa699d",
-    "content-hash": "d8c3ae18e98b6b6856d605130243f369",
+    "hash": "34071fb61e0699065c4d6eb5ebb47f2e",
+    "content-hash": "0e38a37852b7795830bb120e4e2b47e3",
     "packages": [
         {
             "name": "container-interop/container-interop",
@@ -489,6 +489,62 @@
                 "slick"
             ],
             "time": "2016-10-06 16:23:56"
+        },
+        {
+            "name": "slick/configuration",
+            "version": "dev-develop",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/slickframework/configuration.git",
+                "reference": "90716b4aefd0d8c2e2657d795bfd34a48b993d7a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/slickframework/configuration/zipball/90716b4aefd0d8c2e2657d795bfd34a48b993d7a",
+                "reference": "90716b4aefd0d8c2e2657d795bfd34a48b993d7a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "slick/common": "@dev"
+            },
+            "require-dev": {
+                "behat/behat": "~3.0.4",
+                "phpunit/phpunit": "4.*",
+                "scrutinizer/ocular": "~1.1"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1-dev",
+                    "dev-develop": "1.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Slick\\Configuration\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Filipe Silva",
+                    "email": "silvam.filipe@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Slick/Configuration is a simple package that deals with configuration files.",
+            "homepage": "https://github.com/slickframework/configuration",
+            "keywords": [
+                "arrays",
+                "configuration",
+                "ini",
+                "slick"
+            ],
+            "time": "2015-08-28 16:35:34"
         },
         {
             "name": "slick/di",
@@ -1721,7 +1777,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "slick/configuration": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
