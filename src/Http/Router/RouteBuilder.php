@@ -10,6 +10,7 @@
 namespace Slick\Mvc\Http\Router;
 
 use Aura\Router\Map;
+use Aura\Router\RouterContainer;
 use Slick\Mvc\Exception\RoutesFileNotFoundException;
 use Slick\Mvc\Exception\RoutesFileParserException;
 use Slick\Mvc\Http\Router\Builder\FactoryInterface;
@@ -40,6 +41,11 @@ class RouteBuilder implements RouteBuilderInterface
     private $routeFactory;
 
     /**
+     * @var array
+     */
+    private $parsedData;
+
+    /**
      * Creates a route builder
      *
      * @param string           $routesFile
@@ -68,6 +74,19 @@ class RouteBuilder implements RouteBuilderInterface
     public function build(Map $map)
     {
         $this->setDefaults($map);
+        $this->addRoutes($map);
+        return $this;
+    }
+
+    /**
+     * Registers the callback for map creations
+     *
+     * @param RouterContainer $container
+     * @return self|RouteBuilderInterface
+     */
+    public function register(RouterContainer $container)
+    {
+        $container->setMapBuilder([$this, 'build']);
         return $this;
     }
 
@@ -78,6 +97,10 @@ class RouteBuilder implements RouteBuilderInterface
      */
     private function getParsedData()
     {
+        if (is_array($this->parsedData)) {
+            return $this->parsedData;
+        }
+        
         $content = $this->getYmlFileContent();
         try {
             $parsedData = $this->parser->parse($content);
@@ -88,6 +111,7 @@ class RouteBuilder implements RouteBuilderInterface
                 $caught
             );
         }
+        $this->parsedData = $parsedData;
         return $parsedData;
     }
 
@@ -107,6 +131,11 @@ class RouteBuilder implements RouteBuilderInterface
         return file_get_contents($this->routesFile);
     }
 
+    /**
+     * Set map defaults
+     *
+     * @param Map $map
+     */
     private function setDefaults(Map $map)
     {
         $defaults = ['tokens', 'defaults', 'host', 'accepts'];
@@ -114,6 +143,22 @@ class RouteBuilder implements RouteBuilderInterface
             if (in_array($name, $defaults)) {
                 $map->$name($value);
             }
+        }
+    }
+
+    /**
+     * Add routes to the provided route map
+     *
+     * @param Map $map
+     */
+    private function addRoutes(Map $map)
+    {
+        $data = $this->getParsedData();
+        $routes = (array_key_exists('routes', $data))
+            ? $data['routes']
+            : [];
+        foreach ($routes as $name => $definition) {
+            $this->routeFactory->parse($name, $definition, $map);
         }
     }
 }

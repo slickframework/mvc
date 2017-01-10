@@ -4,6 +4,7 @@ namespace spec\Slick\Mvc\Http\Router;
 
 use Aura\Router\Map;
 use Aura\Router\Route;
+use Aura\Router\RouterContainer;
 use PhpSpec\ObjectBehavior;
 use Slick\Mvc\Exception\RoutesFileNotFoundException;
 use Slick\Mvc\Exception\RoutesFileParserException;
@@ -29,6 +30,15 @@ class RouteBuilderSpec extends ObjectBehavior
     function its_a_route_builder()
     {
         $this->shouldBeAnInstanceOf(RouteBuilderInterface::class);
+    }
+
+    function it_registers_itself_to_a_router_container(
+        RouterContainer $container
+    )
+    {
+        $this->register($container)->shouldBe($this->getWrappedObject());
+        $container->setMapBuilder([$this->getWrappedObject(), 'build'])
+            ->shouldHaveBeenCalled();
     }
 
     function it_can_parse_yml_files(
@@ -61,6 +71,31 @@ class RouteBuilderSpec extends ObjectBehavior
         $parser->parse(file_get_contents($file))->willReturn($defaults);
         $this->beConstructedWith($file, $parser, $routeFactory);
         $this->build($map);
+    }
+
+    function it_can_parser_routes_from_yml(
+        Parser $parser,
+        FactoryInterface $routeFactory,
+        Map $map
+    ) {
+        $file = __DIR__ . '/routes.yml';
+        $routes = [
+            'routes' => [
+                'home' => [
+                    'allows' => ['GET', 'POST'],
+                    'path' => '/',
+                    'defaults' => [
+                        'action' => 'home'
+                    ]
+                ]
+            ]
+        ];
+        $parser->parse(file_get_contents($file))
+            ->willReturn($routes);
+        $this->beConstructedWith($file, $parser, $routeFactory);
+        $this->build($map);
+
+        $routeFactory->parse('home', $routes['routes']['home'], $map)->shouldHaveBeenCalled();
     }
 
     function it_throws_exception_when_routes_file_is_not_found(

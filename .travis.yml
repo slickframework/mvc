@@ -24,7 +24,7 @@ before_script:
   - travis_retry composer install --no-interaction --prefer-source
 
 script:
-  - vendor/bin/phpspen run
+  - vendor/bin/phpspec run
 #  - docker-compose up -d
 #  - vendor/bin/behat -f progress
 #  - docker-compose stop

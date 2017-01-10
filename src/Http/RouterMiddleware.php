@@ -10,6 +10,7 @@
 namespace Slick\Mvc\Http;
 
 use Aura\Router\Matcher;
+use Aura\Router\RouterContainer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slick\Http\Server\AbstractMiddleware;
@@ -24,18 +25,18 @@ use Slick\Http\Server\MiddlewareInterface;
 class RouterMiddleware extends AbstractMiddleware implements MiddlewareInterface
 {
     /**
-     * @var Matcher
+     * @var RouterContainer
      */
-    private $matcher;
+    private $routerContainer;
 
     /**
      * Creates Router Middleware
      *
-     * @param Matcher $matcher
+     * @param RouterContainer $routerContainer
      */
-    public function __construct(Matcher $matcher)
+    public function __construct(RouterContainer $routerContainer)
     {
-        $this->matcher = $matcher;
+        $this->routerContainer = $routerContainer;
     }
 
     /**
@@ -50,7 +51,7 @@ class RouterMiddleware extends AbstractMiddleware implements MiddlewareInterface
         ServerRequestInterface $request, ResponseInterface $response
     )
     {
-        $route = $this->matcher->match($request);
+        $route = $this->routerContainer->getMatcher()->match($request);
         $request = $request->withAttribute('route', $route);
         return $this->executeNext($request, $response);
     }

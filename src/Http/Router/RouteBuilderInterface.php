@@ -10,6 +10,7 @@
 namespace Slick\Mvc\Http\Router;
 
 use Aura\Router\Map;
+use Aura\Router\RouterContainer;
 
 /**
  * Router Builder Interface
@@ -30,4 +31,12 @@ interface RouteBuilderInterface
      * @return self|RouteBuilderInterface
      */
     public function build(Map $map);
+
+    /**
+     * Registers the callback for map creations
+     *
+     * @param RouterContainer $container
+     * @return self|RouteBuilderInterface
+     */
+    public function register(RouterContainer $container);
 }

@@ -68,7 +68,7 @@ class Application
     public function getHttpServer()
     {
         if (!$this->httpServer) {
-            $server = $this->getContainer()->get(Server::class);
+            $server = $this->getContainer()->get('middleware.server');
             $this->setHttpServer($server);
         }
         return $this->httpServer;
