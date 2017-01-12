@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file is part of slick/mvc
+ * This file is part of slick/mvc package
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,13 +12,23 @@ namespace Slick\Mvc;
 use Slick\Mvc\Controller\ControllerContextInterface;
 
 /**
- * Controller Interface
+ * Controller
  *
  * @package Slick\Mvc
  * @author  Filipe Silva <silvam.filipe@gmail.com>
  */
-interface ControllerInterface
+abstract class Controller implements ControllerInterface
 {
+
+    /**
+     * @var ControllerContextInterface
+     */
+    protected $context;
+
+    /**
+     * @var array
+     */
+    private $viewData = [];
 
     /**
      * Sets te context for this controller execution
@@ -27,7 +37,11 @@ interface ControllerInterface
      *
      * @return self|ControllerInterface
      */
-    public function setContext(ControllerContextInterface $context);
+    public function setContext(ControllerContextInterface $context)
+    {
+        $this->context = $context;
+        return $this;
+    }
 
     /**
      * Sets a variable to the view data model
@@ -41,12 +55,26 @@ interface ControllerInterface
      *
      * @return self|ControllerInterface
      */
-    public function set($name, $value = null);
+    public function set($name, $value = null)
+    {
+        if (is_array($name)) {
+            foreach ($name as $key => $value) {
+                $this->set($key, $value);
+            }
+            return $this;
+        }
+
+        $this->viewData[$name] = $value;
+        return $this;
+    }
 
     /**
      * A view data model used by renderer
      *
      * @return array
      */
-    public function getViewData();
+    public function getViewData()
+    {
+        return $this->viewData;
+    }
 }

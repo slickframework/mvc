@@ -38,6 +38,17 @@ class DispatcherMiddleware extends AbstractMiddleware implements MiddlewareInter
      */
     private $container;
 
+    /**
+     * Default context class
+     */
+    const CONTEXT_CLASS = Context::class;
+
+    /**
+     * Creates an HTTP request dispatcher middleware
+     *
+     * @param ControllerDispatchInflectorInterface $controllerDispatchInflector
+     * @param ContainerInterface                   $container
+     */
     public function __construct(
         ControllerDispatchInflectorInterface $controllerDispatchInflector,
         ContainerInterface $container
@@ -114,7 +125,10 @@ class DispatcherMiddleware extends AbstractMiddleware implements MiddlewareInter
         ServerRequestInterface $request,
         ResponseInterface $response
     ) {
-        $context = (new Context())->register($request, $response);
+        $contextClass = $this->getContextClass();
+        /** @var ControllerContextInterface $context */
+        $context = $this->container->make($contextClass);
+        $context->register($request, $response);
         $controller->setContext($context);
         return $context;
     }
@@ -132,5 +146,19 @@ class DispatcherMiddleware extends AbstractMiddleware implements MiddlewareInter
         $controllerReflection = new \ReflectionClass($controller);
         $reflectionMethod = $controllerReflection->getMethod($dispatch->getMethod());
         $reflectionMethod->invokeArgs($controller, $dispatch->getArguments());
+    }
+
+    /**
+     * Gets the context class from container
+     *
+     * @return string
+     */
+    private function getContextClass()
+    {
+        $class = self::CONTEXT_CLASS;
+        if ($this->container->has('controller.context.class')) {
+            $class = $this->container->get('controller.context.class');
+        }
+        return $class;
     }
 }

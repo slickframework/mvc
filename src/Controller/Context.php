@@ -36,7 +36,7 @@ class Context implements ControllerContextInterface
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      *
-     * @return self|ControllerContextInterface
+     * @return Context|ControllerContextInterface
      */
     public function register(
         ServerRequestInterface $request,
@@ -48,29 +48,80 @@ class Context implements ControllerContextInterface
         return $this;
     }
 
-    public function getPost($name, $default = null)
+    /**
+     * Gets the post parameter that was submitted with provided name
+     *
+     * If its not submitted the default value will be returned.
+     * If no arguments are passed the full server parameters from request will
+     * be returned. In this case the default value is ignored.
+     *
+     * @param null|string $name
+     * @param mixed       $default
+     *
+     * @return array|string
+     */
+    public function getPost($name = null, $default = null)
     {
-        // TODO: Implement getPost() method.
+        $parameters = $this->request->getServerParams();
+        return $this->getDataFrom($parameters, $name, $default);
     }
 
-    public function getQuery($name, $default = null)
+    /**
+     * Gets the URL query parameter with provided name
+     *
+     * If its not submitted the default value will be returned.
+     * If no arguments are passed the full URL query parameters from request will
+     * be returned. In this case the default value is ignored.
+     *
+     * @param null|string $name
+     * @param mixed       $default
+     *
+     * @return array|string
+     */
+    public function getQuery($name = null, $default = null)
     {
-        // TODO: Implement getQuery() method.
+        $parameters = $this->request->getQueryParams();
+        return $this->getDataFrom($parameters, $name, $default);
     }
 
+    /**
+     * Sets a redirection header in the HTTP response
+     *
+     * @param string $location
+     *
+     * @return void
+     */
     public function redirect($location)
     {
-        // TODO: Implement redirect() method.
+        $response = $this->response
+            ->withStatus(302)
+            ->withHeader('location', $location)
+        ;
+        $this->setResponse($response);
     }
 
+    /**
+     * Disables response rendering
+     *
+     * @return Context|ControllerContextInterface
+     */
     public function disableRendering()
     {
-        // TODO: Implement disableRendering() method.
+        $this->request = $this->request->withAttribute('rendering', false);
+        return $this;
     }
 
+    /**
+     * Sets a new response
+     *
+     * @param ResponseInterface $response
+     *
+     * @return Context|ControllerContextInterface
+     */
     public function setResponse(ResponseInterface $response)
     {
         $this->response = $response;
+        return $this;
     }
 
     /**
@@ -91,5 +142,30 @@ class Context implements ControllerContextInterface
     public function getRequest()
     {
         return $this->request;
+    }
+
+    /**
+     * Gets the parameters with provided name from parameters
+     *
+     * @param array       $parameters
+     * @param string|null $name
+     * @param mixed       $default
+     *
+     * @return array|string|mixed
+     */
+    private function getDataFrom(
+        array $parameters,
+        $name = null,
+        $default = null
+    ) {
+        if ($name === null) {
+            return $parameters;
+        }
+
+        $value = array_key_exists($name, $parameters)
+            ? $parameters[$name]
+            : $default;
+
+        return $value;
     }
 }
