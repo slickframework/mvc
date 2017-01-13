@@ -44,7 +44,6 @@ class DispatcherMiddlewareSpec extends ObjectBehavior
         ResponseInterface $response,
         ControllerDispatchInflectorInterface $controllerDispatchInflector,
         Route $route,
-        ControllerDispatchInflectorInterface $controllerDispatchInflector,
         ContainerInterface $container,
         TestController $controller,
         ControllerContextInterface $context
