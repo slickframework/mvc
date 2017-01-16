@@ -9,7 +9,7 @@
 
 namespace Slick\Mvc\Http;
 
-use Aura\Router\Matcher;
+use Aura\Router\Route;
 use Aura\Router\RouterContainer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -51,8 +51,51 @@ class RouterMiddleware extends AbstractMiddleware implements MiddlewareInterface
         ServerRequestInterface $request, ResponseInterface $response
     )
     {
-        $route = $this->routerContainer->getMatcher()->match($request);
+        $matcher = $this->routerContainer
+            ->getMatcher();
+
+        $route = $matcher->match($request);
+
+        if (!$route) {
+            return $this->handleFailedRoute(
+                $matcher->getFailedRoute(),
+                $response
+            );
+        }
+
         $request = $request->withAttribute('route', $route);
         return $this->executeNext($request, $response);
+    }
+
+    /**
+     * Sets the response for failed route
+     *
+     * @param Route             $failedRoute
+     * @param ResponseInterface $response
+     *
+     * @return ResponseInterface
+     */
+    private function handleFailedRoute(
+        Route $failedRoute,
+        ResponseInterface $response
+    ) {
+        switch ($failedRoute->failedRule) {
+            case 'Aura\Router\Rule\Allows':
+                $response = $response
+                    ->withStatus(405)
+                    ->withHeader('allow', $failedRoute->allows);
+                break;
+
+            case 'Aura\Router\Rule\Accepts':
+                $response = $response
+                    ->withStatus(406);
+                break;
+
+            default:
+                $response = $response
+                    ->withStatus(404);
+        }
+
+        return $response;
     }
 }

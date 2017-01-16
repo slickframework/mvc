@@ -45,4 +45,78 @@ class RouterMiddlewareSpec extends ObjectBehavior
         $this->handle($request, $response)->shouldBe($response);
         $request->withAttribute('route', $route)->shouldHaveBeenCalled();
     }
+
+    function it_returns_a_405_response_if_method_not_allowed(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        RouterContainer $routerContainer,
+        Matcher $matcher
+    ) {
+        $routerContainer->getMatcher()->willReturn($matcher);
+        $matcher->match($request)->willReturn(null);
+        $failRoute = new Route();
+        $failRoute->allows(['POST']);
+        $failRoute->failedRule('Aura\Router\Rule\Allows');
+        $matcher->getFailedRoute()->willReturn($failRoute);
+
+        $request->withAttribute('route', null)
+            ->willReturn($request);
+
+        $response->withStatus(405)
+            ->shouldBeCalled()
+            ->willReturn($response);
+
+        $response->withHeader('allow', $failRoute->allows)
+            ->shouldBeCalled()
+            ->willReturn($response);
+
+        $this->beConstructedWith($routerContainer);
+        $this->handle($request, $response)->shouldBe($response);
+    }
+
+    function it_returns_a_406_response_if_request_not_accepted(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        RouterContainer $routerContainer,
+        Matcher $matcher
+    ) {
+        $routerContainer->getMatcher()->willReturn($matcher);
+        $matcher->match($request)->willReturn(null);
+        $failRoute = new Route();
+        $failRoute->failedRule('Aura\Router\Rule\Accepts');
+        $matcher->getFailedRoute()->willReturn($failRoute);
+
+        $request->withAttribute('route', null)
+            ->willReturn($request);
+
+        $response->withStatus(406)
+            ->shouldBeCalled()
+            ->willReturn($response);
+
+        $this->beConstructedWith($routerContainer);
+        $this->handle($request, $response)->shouldBe($response);
+    }
+
+    function it_returns_a_404_response_for_all_other_failed_routes(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        RouterContainer $routerContainer,
+        Matcher $matcher
+    ) {
+        $routerContainer->getMatcher()->willReturn($matcher);
+        $matcher->match($request)->willReturn(null);
+        $failRoute = new Route();
+        $failRoute->failedRule('other');
+        $matcher->getFailedRoute()->willReturn($failRoute);
+
+        $request->withAttribute('route', null)
+            ->willReturn($request);
+
+        $response->withStatus(404)
+            ->shouldBeCalled()
+            ->willReturn($response);
+
+        $this->beConstructedWith($routerContainer);
+        $this->handle($request, $response)->shouldBe($response);
+    }
 }
