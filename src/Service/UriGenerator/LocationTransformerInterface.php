@@ -9,6 +9,7 @@
 
 namespace Slick\Mvc\Service\UriGenerator;
 
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
 /**
@@ -29,4 +30,13 @@ interface LocationTransformerInterface
      * @return UriInterface|null
      */
     public function transform($location, array $options = []);
+
+    /**
+     * Set the context HTTP request
+     *
+     * @param ServerRequestInterface $request
+     *
+     * @return self|LocationTransformerInterface
+     */
+    public function setRequest(ServerRequestInterface $request);
 }

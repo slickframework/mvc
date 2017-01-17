@@ -23,9 +23,9 @@ interface UriDecoratorInterface
     /**
      * Decorates provided URI
      *
-     * @param UriInterface $uri The URI to decorate
+     * @param null|UriInterface $uri The URI to decorate
      *
      * @return UriInterface
      */
-    public function decorate(UriInterface $uri);
+    public function decorate(UriInterface $uri = null);
 }

@@ -9,6 +9,7 @@
 
 namespace Slick\Mvc\Service;
 
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Slick\Mvc\Service\UriGenerator\LocationTransformerInterface;
 use Slick\Mvc\Service\UriGenerator\UriDecoratorInterface;
@@ -45,7 +46,16 @@ interface UriGeneratorInterface
      * Adds an URI decorator to the decorators list
      *
      * @param UriDecoratorInterface $decorator
-     * @return mixed
+     * @return self|UriGeneratorInterface
      */
     public function addDecorator(UriDecoratorInterface $decorator);
+
+    /**
+     * Set the context HTTP request
+     *
+     * @param ServerRequestInterface $request
+     *
+     * @return self|UriGeneratorInterface
+     */
+    public function setRequest(ServerRequestInterface $request);
 }

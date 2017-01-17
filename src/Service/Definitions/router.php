@@ -17,6 +17,7 @@ use Slick\Mvc\Http\Router\RouteBuilder;
 use Slick\Mvc\Http\RouterMiddleware;
 use Symfony\Component\Yaml\Parser;
 
+Configuration::addPath(dirname(dirname(__DIR__)).'/Configuration');
 $config = Configuration::get('default-settings');
 
 $services = [];
