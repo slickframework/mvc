@@ -4,13 +4,21 @@ namespace spec\Slick\Mvc\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Slick\Di\ContainerInjectionInterface;
 use Slick\Mvc\Controller\Context;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Slick\Mvc\Controller\ControllerContextInterface;
+use Slick\Mvc\Service\UriGeneratorInterface;
 
 class ContextSpec extends ObjectBehavior
 {
+
+    function let(UriGeneratorInterface $uriGenerator)
+    {
+        $this->beConstructedWith($uriGenerator);
+    }
+
     function it_is_initializable()
     {
         $this->shouldHaveType(Context::class);
@@ -19,6 +27,11 @@ class ContextSpec extends ObjectBehavior
     function its_a_controller_context()
     {
         $this->shouldBeAnInstanceOf(ControllerContextInterface::class);
+    }
+
+    function it_implements_a_container_injection_for_initialization()
+    {
+        $this->shouldImplement(ContainerInjectionInterface::class);
     }
 
     function it_uses_an_http_request_and_response(
@@ -99,16 +112,26 @@ class ContextSpec extends ObjectBehavior
 
     function it_can_set_a_redirecting_http_response(
         ServerRequestInterface $request,
-        ResponseInterface $response
+        ResponseInterface $response,
+        UriGeneratorInterface $uriGenerator
     )
     {
+        $this->beConstructedWith($uriGenerator);
+
         $location = 'home';
         $response->withStatus(302)->willReturn($response);
-        $response->withHeader('location', $location)->willReturn($response);
+        $response->withHeader('location', '/pages/index')
+            ->shouldBeCalled()
+            ->willReturn($response);
+
+        $uriGenerator->generate($location, [])
+            ->shouldBeCalled()
+            ->willReturn('/pages/index');
+
         $this->register($request, $response);
         $this->redirect($location);
+
         $response->withStatus(302)->shouldHaveBeenCalled();
-        $response->withHeader('location', $location)->shouldHaveBeenCalled();
     }
 
     function it_can_set_the_disable_rendering_flag_on_request(

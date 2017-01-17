@@ -9,8 +9,11 @@
 
 namespace Slick\Mvc\Controller;
 
+use Interop\Container\ContainerInterface as InteropContainer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Slick\Di\ContainerInjectionInterface;
+use Slick\Mvc\Service\UriGeneratorInterface;
 
 /**
  * Context
@@ -18,7 +21,9 @@ use Psr\Http\Message\ServerRequestInterface;
  * @package Slick\Mvc\Controller
  * @author  Filipe Silva <silvam.filipe@gmail.com>
  */
-class Context implements ControllerContextInterface
+class Context implements
+    ControllerContextInterface,
+    ContainerInjectionInterface
 {
     /**
      * @var ResponseInterface
@@ -29,6 +34,20 @@ class Context implements ControllerContextInterface
      * @var ServerRequestInterface
      */
     private $request;
+    /**
+     * @var UriGeneratorInterface
+     */
+    private $uriGenerator;
+
+    /**
+     * Creates a controller context
+     *
+     * @param UriGeneratorInterface $uriGenerator
+     */
+    public function __construct(UriGeneratorInterface $uriGenerator)
+    {
+        $this->uriGenerator = $uriGenerator;
+    }
 
     /**
      * Registers the HTTP request and response to this context
@@ -87,15 +106,19 @@ class Context implements ControllerContextInterface
     /**
      * Sets a redirection header in the HTTP response
      *
-     * @param string $location
+     * @param string $location Location name, path or identifier
+     * @param array  $options  Filter options
      *
      * @return void
      */
-    public function redirect($location)
+    public function redirect($location, array $options = [])
     {
         $response = $this->response
             ->withStatus(302)
-            ->withHeader('location', $location)
+            ->withHeader(
+                'location',
+                $this->uriGenerator->generate($location, $options)
+            )
         ;
         $this->setResponse($response);
     }
@@ -167,5 +190,23 @@ class Context implements ControllerContextInterface
             : $default;
 
         return $value;
+    }
+
+    /**
+     * Instantiates a new instance of this class.
+     *
+     * This is a factory method that returns a new instance of this class. The
+     * factory should pass any needed dependencies into the constructor of this
+     * class, but not the container itself. Every call to this method must return
+     * a new instance of this class; that is, it may not implement a singleton.
+     *
+     * @param InteropContainer $container
+     *   The service container this instance should use.
+     *
+     * @return Context
+     */
+    public static function create(InteropContainer $container)
+    {
+        return new Context($container->get(UriGeneratorInterface::class));
     }
 }

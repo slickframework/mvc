@@ -18,7 +18,7 @@ use Slick\Http\Session;
 use Slick\Mvc\Http\SessionMiddleware;
 
 // Load default settings
-
+Configuration::addPath(dirname(dirname(__DIR__)).'/Configuration');
 $config = Configuration::get('default-settings');
 
 $services = [];

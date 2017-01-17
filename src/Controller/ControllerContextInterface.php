@@ -65,11 +65,12 @@ interface ControllerContextInterface
     /**
      * Sets a redirection header in the HTTP response
      *
-     * @param string $location
+     * @param string $location Location name, path or identifier
+     * @param array  $options  Filter options
      *
      * @return void
      */
-    public function redirect($location);
+    public function redirect($location, array $options = []);
 
     /**
      * Disables response rendering
