@@ -19,6 +19,7 @@ use Slick\Mvc\Controller\ControllerContextInterface;
 use Slick\Mvc\ControllerInterface;
 use Slick\Mvc\Http\Dispatcher\ControllerDispatch;
 use Slick\Mvc\Http\Dispatcher\ControllerDispatchInflectorInterface;
+use Slick\Mvc\Http\Dispatcher\ControllerInvokerInterface;
 
 /**
  * Dispatcher Middleware
@@ -34,27 +35,33 @@ class DispatcherMiddleware extends AbstractMiddleware implements MiddlewareInter
     private $controllerDispatchInflector;
 
     /**
+     * Default context class
+     */
+    const CONTEXT_CLASS = Context::class;
+    /**
+     * @var ControllerInvokerInterface
+     */
+    private $invoker;
+    /**
      * @var ContainerInterface
      */
     private $container;
 
     /**
-     * Default context class
-     */
-    const CONTEXT_CLASS = Context::class;
-
-    /**
      * Creates an HTTP request dispatcher middleware
      *
      * @param ControllerDispatchInflectorInterface $controllerDispatchInflector
+     * @param ControllerInvokerInterface           $invoker
      * @param ContainerInterface                   $container
      */
     public function __construct(
         ControllerDispatchInflectorInterface $controllerDispatchInflector,
+        ControllerInvokerInterface $invoker,
         ContainerInterface $container
     )
     {
         $this->controllerDispatchInflector = $controllerDispatchInflector;
+        $this->invoker = $invoker;
         $this->container = $container;
     }
 
@@ -70,14 +77,12 @@ class DispatcherMiddleware extends AbstractMiddleware implements MiddlewareInter
         ServerRequestInterface $request, ResponseInterface $response
     )
     {
-        $dispatch = $this->getControllerDispatch($request);
-
-        $controller = $this->createController($dispatch);
-        $context = $this->setControllerContext($controller, $request, $response);
-
-        $this->invokeControllerAction($controller, $dispatch);
-
-        return $this->executeNext($context->getRequest(), $context->getResponse());
+        $controllerDispatch = $this->getControllerDispatch($request);
+        $controller = $this->createController($controllerDispatch);
+        $this->setControllerContext($controller, $request, $response);
+        $dataView = $this->invoker->invoke($controller, $controllerDispatch);
+        $request = $request->withAttribute('viewData', $dataView);
+        return $this->executeNext($request, $response);
     }
 
     /**
@@ -131,21 +136,6 @@ class DispatcherMiddleware extends AbstractMiddleware implements MiddlewareInter
         $context->register($request, $response);
         $controller->setContext($context);
         return $context;
-    }
-
-    /**
-     * Invokes the controller handler method
-     *
-     * @param ControllerInterface $controller
-     * @param ControllerDispatch  $dispatch
-     */
-    private function invokeControllerAction(
-        ControllerInterface $controller,
-        ControllerDispatch $dispatch
-    ) {
-        $controllerReflection = new \ReflectionClass($controller);
-        $reflectionMethod = $controllerReflection->getMethod($dispatch->getMethod());
-        $reflectionMethod->invokeArgs($controller, $dispatch->getArguments());
     }
 
     /**
