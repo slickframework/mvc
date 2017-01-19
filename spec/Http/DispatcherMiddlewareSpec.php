@@ -9,10 +9,13 @@ use Prophecy\Argument;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slick\Di\ContainerInterface;
+use Slick\Di\Exception\ClassNotFoundException;
+use Slick\Http\Response;
 use Slick\Http\Server\MiddlewareInterface;
 use Slick\Mvc\Controller\Context;
 use Slick\Mvc\Controller\ControllerContextInterface;
 use Slick\Mvc\ControllerInterface;
+use Slick\Mvc\Exception\ControllerNotFoundException;
 use Slick\Mvc\Http\Dispatcher\ControllerDispatch;
 use Slick\Mvc\Http\Dispatcher\ControllerDispatchInflectorInterface;
 use Slick\Mvc\Http\Dispatcher\ControllerInvokerInterface;
@@ -86,6 +89,10 @@ class DispatcherMiddlewareSpec extends ObjectBehavior
         $invoker
             ->invoke($controller, Argument::type(ControllerDispatch::class))
             ->willReturn([]);
+        $context->register(
+            Argument::type(ServerRequestInterface::class),
+            Argument::type(ResponseInterface::class)
+        )->willReturn(true);
     }
 
     function it_is_initializable()
@@ -180,6 +187,44 @@ class DispatcherMiddlewareSpec extends ObjectBehavior
             ->shouldHaveBeenCalled();
     }
 
+    function it_will_forward_the_request_from_controller_context(
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    )
+    {
+        $this->prepareRequest($request);
+
+        $this->contextMock->getRequest()
+            ->shouldBeCalled()
+            ->willReturn($request);
+        $this->handle($request, $response);
+    }
+
+    function it_will_forward_the_response_from_controller_context(
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    ) {
+        $this->prepareRequest($request);
+
+        $this->contextMock->getResponse()
+            ->shouldBeCalled()
+            ->willReturn($response);
+
+        $this->handle($request, $response);
+    }
+
+    function it_throws_unknown_controller_exception_for_an_undefined_controller_class(
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    )
+    {
+        $this->prepareRequest($request);
+        $this->containerMock
+            ->make("controllerClass")
+            ->willThrow(new ClassNotFoundException());
+        $this->shouldThrow(ControllerNotFoundException::class)
+            ->during('handle', [$request, $response]);
+    }
 
 
     private function prepareRequest(
@@ -192,6 +237,8 @@ class DispatcherMiddlewareSpec extends ObjectBehavior
             ->willReturn($route);
         $request->withAttribute('viewData', [])
             ->willReturn($request);
+        $this->contextMock->getRequest()->willReturn($request);
+        $this->contextMock->getResponse()->willReturn(new Response());
     }
 
 }

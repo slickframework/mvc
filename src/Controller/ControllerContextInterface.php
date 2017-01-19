@@ -80,6 +80,15 @@ interface ControllerContextInterface
     public function disableRendering();
 
     /**
+     * Sets the view that will be rendered
+     *
+     * @param string $viewPath
+     *
+     * @return self|ControllerContextInterface
+     */
+    public function setView($viewPath);
+
+    /**
      * Sets a new response
      *
      * @param ResponseInterface $response

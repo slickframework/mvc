@@ -3,6 +3,8 @@
 namespace spec\Slick\Mvc\Http\Dispatcher;
 
 use Aura\Router\Route;
+use PhpSpec\Exception\Example\FailureException;
+use PhpSpec\Wrapper\Subject;
 use Slick\Mvc\Http\Dispatcher\ControllerDispatch;
 use Slick\Mvc\Http\Dispatcher\ControllerDispatchInflector;
 use PhpSpec\ObjectBehavior;
@@ -31,5 +33,44 @@ class ControllerDispatchInflectorSpec extends ObjectBehavior
             'args' => [123, 'test']
         ]);
         $this->inflect($route)->shouldBeAnInstanceOf(ControllerDispatch::class);
+    }
+
+    function it_converts_dashed_url_controller_param_into_controller_class_names()
+    {
+        $route = new Route();
+        $route->attributes([
+            'namespace' => 'Controller',
+            'controller' => 'yellow-pages',
+            'action' => 'index'
+        ]);
+        $this->inflect($route)->shouldHaveControllerNamed('Controller\YellowPages');
+    }
+
+    function it_converts_underscored_url_controller_param_into_controller_class_names()
+    {
+        $route = new Route();
+        $route->attributes([
+            'namespace' => 'Controller',
+            'controller' => 'yellow_pages',
+            'action' => 'index'
+        ]);
+        $this->inflect($route)->shouldHaveControllerNamed('Controller\YellowPages');
+    }
+
+
+    public function getMatchers()
+    {
+        return [
+            'haveControllerNamed' => function (ControllerDispatch $subject, $name) {
+
+                if ($subject->getControllerClassName() !== $name) {
+                    throw new FailureException(
+                        "Expected controller name to be '{$name}', ".
+                        "but got {$subject->getControllerClassName()}"
+                    );
+                }
+                return true;
+            }
+        ];
     }
 }

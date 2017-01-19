@@ -145,4 +145,17 @@ class ContextSpec extends ObjectBehavior
         $request->withAttribute('rendering', false)->shouldHaveBeenCalled();
     }
 
+    function it_can_set_the_rendering_view(
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    )
+    {
+        $this->register($request, $response);
+
+        $request->withAttribute('view', 'path/to/view.twig')
+            ->shouldBeCalled()
+            ->willReturn($request);
+        $this->setView('path/to/view.twig')->shouldReturn($this->getWrappedObject());
+    }
+
 }

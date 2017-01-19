@@ -12,11 +12,13 @@ namespace Slick\Mvc\Http;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slick\Di\ContainerInterface;
+use Slick\Di\Exception\ClassNotFoundException;
 use Slick\Http\Server\AbstractMiddleware;
 use Slick\Http\Server\MiddlewareInterface;
 use Slick\Mvc\Controller\Context;
 use Slick\Mvc\Controller\ControllerContextInterface;
 use Slick\Mvc\ControllerInterface;
+use Slick\Mvc\Exception\ControllerNotFoundException;
 use Slick\Mvc\Http\Dispatcher\ControllerDispatch;
 use Slick\Mvc\Http\Dispatcher\ControllerDispatchInflectorInterface;
 use Slick\Mvc\Http\Dispatcher\ControllerInvokerInterface;
@@ -46,6 +48,11 @@ class DispatcherMiddleware extends AbstractMiddleware implements MiddlewareInter
      * @var ContainerInterface
      */
     private $container;
+
+    /**
+     * @var ControllerContextInterface
+     */
+    private $context;
 
     /**
      * Creates an HTTP request dispatcher middleware
@@ -79,9 +86,14 @@ class DispatcherMiddleware extends AbstractMiddleware implements MiddlewareInter
     {
         $controllerDispatch = $this->getControllerDispatch($request);
         $controller = $this->createController($controllerDispatch);
+
         $this->setControllerContext($controller, $request, $response);
         $dataView = $this->invoker->invoke($controller, $controllerDispatch);
+
+        $request = $this->context->getRequest();
         $request = $request->withAttribute('viewData', $dataView);
+        $response = $this->context->getResponse();
+
         return $this->executeNext($request, $response);
     }
 
@@ -110,9 +122,17 @@ class DispatcherMiddleware extends AbstractMiddleware implements MiddlewareInter
      */
     private function createController(ControllerDispatch $dispatch)
     {
-        $controller = $this->container
-            ->make($dispatch->getControllerClassName())
-        ;
+        try {
+            $controller = $this->container
+                ->make($dispatch->getControllerClassName())
+            ;
+        } catch (ClassNotFoundException $caught) {
+            throw new ControllerNotFoundException(
+                "The controller '{$dispatch->getControllerClassName()}' was ".
+                "not found."
+            );
+        }
+
         return $controller;
     }
 
@@ -135,6 +155,7 @@ class DispatcherMiddleware extends AbstractMiddleware implements MiddlewareInter
         $context = $this->container->make($contextClass);
         $context->register($request, $response);
         $controller->setContext($context);
+        $this->context = $context;
         return $context;
     }
 

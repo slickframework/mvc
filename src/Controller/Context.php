@@ -50,6 +50,24 @@ class Context implements
     }
 
     /**
+     * Instantiates a new instance of this class.
+     *
+     * This is a factory method that returns a new instance of this class. The
+     * factory should pass any needed dependencies into the constructor of this
+     * class, but not the container itself. Every call to this method must return
+     * a new instance of this class; that is, it may not implement a singleton.
+     *
+     * @param InteropContainer $container
+     *   The service container this instance should use.
+     *
+     * @return Context
+     */
+    public static function create(InteropContainer $container)
+    {
+        return new Context($container->get(UriGeneratorInterface::class));
+    }
+
+    /**
      * Registers the HTTP request and response to this context
      *
      * @param ServerRequestInterface $request
@@ -135,6 +153,20 @@ class Context implements
     }
 
     /**
+     * Sets the view that will be rendered
+     *
+     * @param string $viewPath
+     *
+     * @return Context|ControllerContextInterface
+     */
+    public function setView($viewPath)
+    {
+        $this->request = $this->request
+            ->withAttribute('view', $viewPath);
+        return $this;
+    }
+
+    /**
      * Sets a new response
      *
      * @param ResponseInterface $response
@@ -192,21 +224,4 @@ class Context implements
         return $value;
     }
 
-    /**
-     * Instantiates a new instance of this class.
-     *
-     * This is a factory method that returns a new instance of this class. The
-     * factory should pass any needed dependencies into the constructor of this
-     * class, but not the container itself. Every call to this method must return
-     * a new instance of this class; that is, it may not implement a singleton.
-     *
-     * @param InteropContainer $container
-     *   The service container this instance should use.
-     *
-     * @return Context
-     */
-    public static function create(InteropContainer $container)
-    {
-        return new Context($container->get(UriGeneratorInterface::class));
-    }
 }

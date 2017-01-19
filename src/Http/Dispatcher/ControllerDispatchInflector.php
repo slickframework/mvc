@@ -63,7 +63,7 @@ class ControllerDispatchInflector implements ControllerDispatchInflectorInterfac
      */
     private function createDispatch(array $arguments)
     {
-        $arguments['controller'] = ucfirst($arguments['controller']);
+        $arguments['controller'] = $this->filterName($arguments['controller']);
         $data = [
             'className' => ltrim("{$arguments['namespace']}"."\\"."{$arguments['controller']}", "\\"),
             'method' => $arguments['action'],
@@ -71,5 +71,23 @@ class ControllerDispatchInflector implements ControllerDispatchInflectorInterfac
         ];
         $reflection = new \ReflectionClass(ControllerDispatch::class);
         return $reflection->newInstanceArgs($data);
+    }
+
+    /**
+     * Filters the controller class name
+     *
+     * @param string $name
+     *
+     * @return string
+     */
+    private function filterName($name)
+    {
+        $name = str_replace(['-', '_'], ' ', $name);
+        $words = explode(' ', $name);
+        $filtered = '';
+        foreach ($words as $word) {
+            $filtered .= ucfirst($word);
+        }
+        return $filtered;
     }
 }

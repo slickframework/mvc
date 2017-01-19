@@ -46,6 +46,8 @@ $services['middleware.server'] = ObjectDefinition::create(Server::class)
     ->with('@server.request', '@server.response')
 
     ->call('add')->with('@session.middleware')
-    ->call('add')->with('@router.middleware');
+    ->call('add')->with('@router.middleware')
+    ->call('add')->with('@dispatcher.middleware')
+;
 
 return $services;
