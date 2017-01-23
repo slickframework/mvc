@@ -19,4 +19,7 @@ $settings['session'] = [
     'options' => []
 ];
 
+// Set the default path
+$settings['source-templates'] = dirname(dirname(__DIR__)) . '/templates';
+
 return $settings;

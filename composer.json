@@ -27,7 +27,8 @@
     "slick/http": "^1.2",
     "slick/configuration": "@dev",
     "symfony/yaml": "^3.2",
-    "aura/router": "^3.0"
+    "aura/router": "^3.0",
+    "slick/template": "^1.2"
   },
   "require-dev": {
     "phpspec/phpspec": "^3.2"
