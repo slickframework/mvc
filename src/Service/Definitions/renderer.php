@@ -9,7 +9,7 @@
 
 namespace Slick\Mvc\Services\Definitions;
 
-use Slick\Configuration\Configuration;
+use Slick\Di\ContainerInterface;
 use Slick\Di\Definition\ObjectDefinition;
 use Slick\Mvc\Http\Renderer\TemplateExtension\HtmlExtension;
 use Slick\Mvc\Http\Renderer\ViewInflector;
@@ -18,10 +18,7 @@ use Slick\Mvc\Http\RendererMiddleware;
 use Slick\Template\Template;
 
 $services = [];
-// Load default settings
-Configuration::addPath(dirname(dirname(__DIR__)).'/Configuration');
-$config = Configuration::get('default-settings');
-Template::appendPath($config->get('source-templates'));
+Template::appendPath(dirname(dirname(dirname(__DIR__))).'/templates');
 
 // HTML SERVER RENDERER MIDDLEWARE
 $services['renderer.middleware'] = ObjectDefinition
@@ -37,10 +34,13 @@ $services['view.inflector'] = ObjectDefinition
 ;
 
 // TEMPLATE DEFINITIONS
-$services['template.engine'] = function () {
+$services['template.engine'] = function (ContainerInterface $container) {
     $template = new Template(Template::ENGINE_TWIG);
-    $template->addExtension(HtmlExtension::class);
+    $template->addExtension($container->get('html.extension'));
     return $template->initialize();
 };
+$services['html.extension'] = ObjectDefinition
+    ::create(HtmlExtension::class)
+    ->with('@uri.generator');
 
 return $services;

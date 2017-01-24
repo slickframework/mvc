@@ -11,29 +11,32 @@ namespace Slick\Mvc\Services\Definitions;
 
 use Aura\Router\RouterContainer;
 use Slick\Configuration\Configuration;
+use Slick\Di\ContainerInterface;
 use Slick\Di\Definition\ObjectDefinition;
 use Slick\Mvc\Http\Router\Builder\RouteFactory;
 use Slick\Mvc\Http\Router\RouteBuilder;
 use Slick\Mvc\Http\RouterMiddleware;
 use Symfony\Component\Yaml\Parser;
 
-// Load default settings
-Configuration::addPath(dirname(dirname(__DIR__)).'/Configuration');
-$config = Configuration::get('default-settings');
-
 $services = [];
 
+$services['routes.file'] = __DIR__.'/routes.yml';
 $services['router.middleware'] = ObjectDefinition::create(RouterMiddleware::class)
     ->with('@router.container');
+
 $services['route.builder'] = ObjectDefinition::create(RouteBuilder::class)
     ->with(
-        $config->get('routes', __DIR__.'/routes.yml'),
+        '@routes.file',
         '@routes.yml.parser',
         '@route.factory'
-    )
-    ->call('register')->with('@router.container')
-;
-$services['router.container'] = ObjectDefinition::create(RouterContainer::class);
+    );
+$services['router.container'] = function (ContainerInterface $container) {
+    /** @var RouteBuilder $builder */
+    $builder = $container->get('route.builder');
+    $routerContainer = new RouterContainer();
+    $builder->register($routerContainer);
+    return $routerContainer;
+};
 $services['routes.yml.parser']= ObjectDefinition::create(Parser::class);
 $services['route.factory'] = ObjectDefinition::create(RouteFactory::class);
 

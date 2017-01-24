@@ -22,7 +22,8 @@ use Slick\Http\Server\MiddlewareInterface;
  * @package Slick\Mvc\Http
  * @author  Filipe Silva <silvam.filipe@gmail.com>
  */
-class RouterMiddleware extends AbstractMiddleware implements MiddlewareInterface
+final class RouterMiddleware extends AbstractMiddleware implements
+    MiddlewareInterface
 {
     /**
      * @var RouterContainer

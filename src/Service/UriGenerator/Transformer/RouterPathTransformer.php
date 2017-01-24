@@ -9,6 +9,7 @@
 
 namespace Slick\Mvc\Service\UriGenerator\Transformer;
 
+use Aura\Router\Exception\RouteNotFound;
 use Aura\Router\RouterContainer;
 use Psr\Http\Message\UriInterface;
 use Slick\Http\Uri;
@@ -49,11 +50,11 @@ class RouterPathTransformer extends AbstractLocationTransformer implements
      */
     public function transform($location, array $options = [])
     {
-        $path = $this->router
-            ->getGenerator()
-            ->generate($location, $this->getRouteArguments($options));
-
-        if (!$path) {
+        try {
+            $path = $this->router
+                ->getGenerator()
+                ->generate($location, $this->getRouteArguments($options));
+        } catch (RouteNotFound $caught) {
             return null;
         }
 

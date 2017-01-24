@@ -33,7 +33,7 @@ class HtmlExtension extends AbstractTwigExtension implements
      * @var array Default options for addCss and addJs template functions
      */
     private static $options = [
-        'is_safe' => true
+        'is_safe' => ['html']
     ];
 
     /**
@@ -85,10 +85,7 @@ class HtmlExtension extends AbstractTwigExtension implements
         $attr = array_key_exists('attr', $options) ? $options['attr'] : [];
         $attr = array_merge(['rel' => 'stylesheet'], $attr);
 
-        $location = $this->location(
-            str_replace('//', '', "{$path}/{$file}"),
-            $options
-        );
+        $location = $this->location("{$path}/{$file}", $options);
 
         return sprintf(
             '<link href="%s" %s>',
@@ -145,11 +142,16 @@ class HtmlExtension extends AbstractTwigExtension implements
     private function jsClosure()
     {
         return function ($file, $path = 'js', array $options = []) {
-            $location = $this->location(
-                str_replace('//', '', "{$path}/{$file}"),
-                $options
+            $attr = array_key_exists('attr', $options)
+                ? $options['attr']
+                : [];
+
+            $location = $this->location("{$path}/{$file}", $options);
+            return sprintf(
+                '<script src="%s" %s></script>',
+                $location,
+                $this->attributesStr($attr)
             );
-            return sprintf('<script src="%s"></script>', $location);
         };
     }
 }

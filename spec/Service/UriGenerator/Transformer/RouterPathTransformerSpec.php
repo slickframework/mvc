@@ -2,6 +2,7 @@
 
 namespace spec\Slick\Mvc\Service\UriGenerator\Transformer;
 
+use Aura\Router\Exception\RouteNotFound;
 use Aura\Router\Generator;
 use Aura\Router\RouterContainer;
 use PhpSpec\Exception\Example\FailureException;
@@ -46,7 +47,7 @@ class RouterPathTransformerSpec extends ObjectBehavior
 
         $generator->generate('test', [])
             ->shouldBeCalled()
-            ->willReturn(false);
+            ->willThrow(new RouteNotFound());
 
         $this->transform('test')->shouldBeNull();
     }
