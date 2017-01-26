@@ -39,7 +39,8 @@
   "require-dev": {
     "phpspec/phpspec": "^3.2",
     "behat/mink-extension": "^2.2",
-    "behat/mink-goutte-driver": "^1.2"
+    "behat/mink-goutte-driver": "^1.2",
+    "slick/console": "^1.2@dev"
   },
   "extra": {
     "branch-alias": {
