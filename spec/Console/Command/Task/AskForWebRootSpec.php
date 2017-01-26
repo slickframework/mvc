@@ -45,7 +45,7 @@ class AskForWebRootSpec extends ObjectBehavior
 
     private function validateQuestion(Question $question)
     {
-        $message = "What's the application document root? [webroot] ";
+        $message = "What's the application document root? (webroot): ";
         if ($question->getQuestion() !== $message) {
             throw new FailureException(
                 "Expected \"{$message}\" question, " .

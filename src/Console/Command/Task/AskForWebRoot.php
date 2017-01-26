@@ -55,6 +55,11 @@ class AskForWebRoot implements TaskInterface
     {
         /** @var QuestionHelper $helper */
         $helper = $this->command->getHelper('question');
-        return $helper->ask($input, $output, new Question("What's the application document root? [webroot] ", 'webroot'));
+        $default = 'webroot';
+        $question = "What's the application document root? ({$default}): ";
+        return $helper->ask(
+            $input,
+            $output,
+            new Question($question, $default));
     }
 }
