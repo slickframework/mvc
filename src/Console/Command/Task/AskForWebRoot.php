@@ -10,10 +10,12 @@
 namespace Slick\Mvc\Console\Command\Task;
 
 use Slick\Mvc\Console\Command\TaskInterface;
+use Slick\Mvc\Console\Exception\OperationAbortedException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
 /**
@@ -49,7 +51,7 @@ class AskForWebRoot implements TaskInterface
      * @param InputInterface $input An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      *
-     * @return mixed
+     * @return mixed|false
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -57,9 +59,40 @@ class AskForWebRoot implements TaskInterface
         $helper = $this->command->getHelper('question');
         $default = 'webroot';
         $question = "What's the application document root? ({$default}): ";
-        return $helper->ask(
+        $docRoot = $helper->ask(
             $input,
             $output,
             new Question($question, $default));
+
+        return $this->check($docRoot, $input, $output) ? $docRoot : false;
+    }
+
+    /**
+     * Checks if the document root has an index.php file. If so overwrite?
+     *
+     * @param string          $docRoot
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     *
+     * @return bool
+     */
+    public function check($docRoot, InputInterface $input, OutputInterface $output)
+    {
+        if (!file_exists(getcwd()."/$docRoot")) return true;
+
+        /** @var QuestionHelper $helper */
+        $helper = $this->command->getHelper('question');
+
+        $question = "There is an 'index.php' file in this folder, overwrite it? (y/N): ";
+        $default = false;
+        $question = new ConfirmationQuestion($question, $default, '/(y|yes)/i');
+
+        if (!$helper->ask($input, $output, $question)) {
+            throw new OperationAbortedException(
+                "Operation aborted! No file file will be overwritten."
+            );
+        }
+
+        return true;
     }
 }

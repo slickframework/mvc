@@ -7,10 +7,12 @@ use Slick\Mvc\Console\Command\Task\AskForWebRoot;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Slick\Mvc\Console\Command\TaskInterface;
+use Slick\Mvc\Console\Exception\OperationAbortedException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
 class AskForWebRootSpec extends ObjectBehavior
@@ -41,6 +43,32 @@ class AskForWebRootSpec extends ObjectBehavior
         $expected = 'public';
         $this->setUp($expected, $command, $helper, $input, $output);
         $this->execute($input, $output)->shouldBe($expected);
+    }
+
+    function it_asks_for_override_if_index_file_exists(
+        Command $command,
+        QuestionHelper $helper,
+        InputInterface $input,
+        OutputInterface $output
+    ) {
+        $command->getHelper('question')
+            ->shouldBeCalled()
+            ->willReturn($helper);
+
+        $helper->ask($input, $output, Argument::type(ConfirmationQuestion::class))
+            ->shouldBeCalled()
+            ->willReturn(false);
+
+        $this->shouldThrow(OperationAbortedException::class)
+            ->during('check', ['features/app/webroot', $input, $output]);
+    }
+
+    function it_check_for_index_file_in_folder(
+        InputInterface $input,
+        OutputInterface $output
+    ) {
+
+        $this->check('webroot', $input, $output)->shouldBe(true);
     }
 
     private function validateQuestion(Question $question)
