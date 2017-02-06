@@ -19,6 +19,7 @@ use Slick\Http\Session;
 use Slick\Http\SessionDriverInterface;
 use Slick\Mvc\Http\SessionMiddleware;
 use Slick\Mvc\Http\UrlRewriterMiddleware;
+use Slick\Mvc\Service\FlashMessages;
 
 $services = [];
 
@@ -30,6 +31,11 @@ $services['session.driver'] = function (ContainerInterface $container) {
         ['driver' => $container->get(SessionDriverInterface::class)]
     );
     return $session->initialize();
+};
+
+// FLASH MESSAGES
+$services['flash.messages'] = function (ContainerInterface $container) {
+    return new FlashMessages($container->get('session.driver'));
 };
 
 // REQUEST/RESPONSE objects
