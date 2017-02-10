@@ -61,8 +61,10 @@ final class RendererMiddleware extends AbstractMiddleware implements
     public function handle(
         ServerRequestInterface $request, ResponseInterface $response
     ) {
-        $content = $this->getContent($request);
-        $response = $this->writeContent($response, $content);
+        if ($response->getStatusCode() !== 302) {
+            $content = $this->getContent($request);
+            $response = $this->writeContent($response, $content);
+        }
 
         return $this->executeNext($request, $response);
     }

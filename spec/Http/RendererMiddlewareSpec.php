@@ -40,6 +40,18 @@ class RendererMiddlewareSpec extends ObjectBehavior
         $this->shouldBeAnInstanceOf(MiddlewareInterface::class);
     }
 
+    function it_skips_its_turn_if_a_302_status_code_is_already_set(
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    )
+    {
+        $response->getStatusCode()
+            ->shouldBeCalled()
+            ->willReturn(302);
+
+        $this->handle($request, $response)->shouldBe($response);
+    }
+
     function it_uses_inflector_to_determine_the_template_file_name(
         ServerRequestInterface $request,
         ResponseInterface $response,
@@ -62,6 +74,7 @@ class RendererMiddlewareSpec extends ObjectBehavior
         $templateEngine->process([])
             ->shouldBeCalled()
             ->willReturn('Hello world!');
+        $response->getStatusCode()->willReturn(200);
         $response->withBody(
             Argument::that(function (Stream $argument) {
                 $argument->rewind();
