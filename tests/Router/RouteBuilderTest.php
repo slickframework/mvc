@@ -94,7 +94,7 @@ class RouteBuilderTest extends TestCase
             ->getMock();
         $map->expects($this->once())
             ->method('tokens')
-            ->with(['id' => '\d+']);
+            ->with(['id' => 'd+']);
 
         $factory = $this->getFactoryMock();
 

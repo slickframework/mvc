@@ -2,6 +2,11 @@
 
 All Notable changes to `Slick/Mvc` will be documented in this file.
 
+## 1.0.2 - 2017-01-11
+
+### Added
+- Dependencies to work with symfony/yaml: ^3.0
+
 ## 1.0.1 - 2017-01-11
 
 ### Added

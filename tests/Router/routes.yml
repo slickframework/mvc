@@ -1,6 +1,6 @@
 # Route definitio file
 tokens:
-  id: "\d+"
+  id: d+
 routes:
   blog.read: /blog/{id}
   blog.add:
