@@ -33,7 +33,7 @@
     "slick/form": "^1.2",
     "slick/orm": "^1.3@dev",
     "aura/router": "^3.0",
-    "symfony/yaml": "^2.1",
+    "symfony/yaml": "^3.0",
     "filp/whoops": "^2.1",
     "slick/console": "^1.2"
   },
